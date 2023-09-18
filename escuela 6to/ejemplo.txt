@@ -1,0 +1,50 @@
+from PIL import Image
+import numpy as np #importe de libreria
+from matplotlib import pyplot as plt #pa plotear
+import cv2
+class Solution(object):
+   def numIslands(self, grid):
+      if len(grid) == 0:
+         return 0
+      n= len(grid)
+      m = len(grid[0])
+      ans = 0
+      for i in range(n):
+         for j in range(m):
+            if grid[i][j] == "1":
+               ans+=1
+            self.make_water(i,j,n,m,grid)
+      return ans
+   def make_water(self,i,j,n,m,grid):
+      if i<0 or j<0 or i>=n or j>=m:
+         return
+      if grid[i][j] == "0":
+         return
+      else:
+         grid[i][j]="0"
+      self.make_water(i+1,j,n,m,grid)
+      self.make_water(i,j+1,n,m,grid)
+      self.make_water(i-1,j,n,m,grid)
+      self.make_water(i,j-1,n,m,grid)
+ob1 = Solution()
+
+img=Image.open('alacran_byn.png')
+pix_val=list(img.getdata())
+plt.imshow(img,cmap="gray",vmin=0,vmax=255)
+print("Maximo= ", np.max(pix_val))
+print("Minimo= ", np.min(pix_val))
+img=np.array(img)
+[n,m]=img.shape
+print(n)
+print(m)
+bw_img=np.zeros(img.shape)
+
+for i in range(n):
+    for j in range(m):
+        if img[i,j]>200:
+            bw_img[i,j]=1
+        else:
+         bw_img[i,j]=0
+plt.imshow(bw_img,cmap='gray')
+
+print(ob1.numIslands(bw_img))
