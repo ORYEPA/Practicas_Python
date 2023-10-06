@@ -1,0 +1,92 @@
+
+
+
+
+# Importing the libraries that are going to be used IN the program.
+IMPORT tkinter as tk
+from tkinter IMPORT filedialog
+IMPORT numpy as np 
+from matplotlib IMPORT pyplot as plt 
+from PIL IMPORT Image
+IMPORT cv2
+from skimage IMPORT measure
+from matplotlib.gridspec IMPORT GridSpec
+DEFINE FUNCTION procesado_principal(file):
+    ""
+    It takes an image, converts it to grayscale, then applies a series of filters to it, and finally
+    displays the result.
+    :param file: The name of the file to be processed
+    """
+    img=Image.open(file).convert('L')
+    SET fig1, ax1 TO plt.subplots()
+    SET im TO ax1.imshow(img)
+    SET y TO np.array(range(0))
+    ax1.plot(y)
+    pix_val=list(img.getdata())
+    OUTPUT("Maximo= ", np.max(pix_val))
+    OUTPUT("Minimo= ", np.min(pix_val))
+    img=np.array(img)
+    [n,m]=img.shape
+    OUTPUT(n)
+    OUTPUT(m)
+    # Finding the number of islands IN the image.
+    umbral,img_bin=cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    SET blobs_labels TO measure.label(img_bin, background=0)
+    SET OUTPUT("Islas numero TO ",np.max(blobs_labels))
+    # A filter that is applied to the image.
+    SET kernel TO np.array(
+        [[0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0]], np.uint8)
+    OUTPUT(kernel)
+    SET umbral,img_bw TO cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    SET OUTPUT("Umbral Otsu TO ", umbral)
+    # A filter that is applied to the image.
+    SET img_dilate TO cv2.dilate(img_bw,kernel,iterations=15)
+    SET blobs_labels TO measure.label(img_dilate,background=0)
+    SET OUTPUT("Cantidad de islas TO ", np.max(blobs_labels))
+    SET mask TO np.where(blobs_labels==1, 0,1)
+    SET mask TO np.logical_not(mask)
+    SET img_maskor TO np.copy(img
+    SET img_maskor[mask] TO 0
+    # A thresholding operation.
+    SET ret,th1 TO cv2.threshold(img_maskor,85,255,cv2.THRESH_BINARY)
+    SET maskj TO np.where(blobs_labels==1, 0,1)
+    SET maskj TO np.logical_not(th1)
+    SET img_mask TO np.copy(img_maskor)
+    SET img_mask[maskj] TO 0
+    # A thresholding operation.
+    SET ret2,th2 TO cv2.threshold(img_mask,120,255,cv2.THRESH_BINARY)
+    SET maskj TO np.where(blobs_labels==1, 0,1)
+    SET maskj TO np.logical_not(th2)
+    SET img_maskaa TO np.copy(img_maskor)
+    SET img_maskaa[maskj] TO 0
+    SET kernel2 TO np.ones((6,6), np.uint8)
+    # Applying a filter to the image.
+    SET img_dilate TO cv2.dilate(img_maskaa,kernel2,iterations=6)  
+    SET maskj TO np.where(blobs_labels==1, 0,1)
+    SET maskj TO np.logical_not(img_dilate)
+    SET img_maskaa TO np.copy(img_maskor)
+    SET img_maskaa[maskj] TO 0 
+    # Plotting the image.
+    SET fig, ax TO plt.subplots()
+    SET im TO ax.imshow(img_maskaa)
+    SET x TO np.array(range(0))
+    ax.plot(x)   
+    plt.show()
+DEFINE FUNCTION open_file_dialog():
+    # """
+    # It opens a file dialog and RETURNs the path of the file selected.
+    # """
+    SET file_path TO filedialog.askopenfilename()
+    OUTPUT(file_path)
+    file=str(file_path)
+    procesado_principal(file)
+# Creating a button that when clicked opens a file dialog.
+SET root TO tk.Tk()
+SET button TO tk.Button(root, text="Open File", command=open_file_dialog)
+button.pack()
+root.mainloop()
+
